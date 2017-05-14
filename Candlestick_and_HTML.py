@@ -16,7 +16,7 @@ import time # execuation time clacualitons
 start_time = time.time()
 
 #CSV data-sets
-def csv_data(dataf):
+def csv_data(dataf): # for analizing csv datasets
     
     #-------------------Read Data/CSV File 1---------------------#
     
@@ -49,8 +49,14 @@ def csv_data(dataf):
     
     print("CSV DATASETS: ")
     #-------------------Aanalize CSV Data---------------------#
-    #if(this.high>=prev.high && this.low<=prev.low && this.open<=prev.close && this.close>=prev.open)--->Bullish engulfing
-    #if(this.high>=prev.high && this.low<=prev.low && this.open>=prev.close && this.close<=prev.open)--->Bearish engulfing
+    """ 
+    Conditions:
+        1. For Bullish engulfing:  
+           if ( (day2.high >= day1.high)  and  (day2.low <= day1.low) and (day2.open <= day1.close) and (day2.close >= day1.open) ) 
+        2. For Bearish engulfing:
+           if ( (day2.high >= day1.high) and (day2.low <= day1.low) and (day2.open >= day1.close) and (day2.close <= day1.open) )
+    """
+    
     def itrate_and_compare1(this,prev):
         lis = []
         count = 0
@@ -69,14 +75,14 @@ def csv_data(dataf):
                 lis.append(count)
         return(lis)
     
-    def green_candle(close,openn):
+    def green_candle(close,openn): # find bullish candlestick
         lis = []
         for i,j in zip(range(0,len(close)),range(0,len(openn))):
             if close[i]>openn[j]:
                 lis.append(close)
         return(lis)
     
-    def red_candle(close,openn):
+    def red_candle(close,openn): # find bearish candlestick
         lis = []
         for i,j in zip(range(0,len(close)),range(0,len(openn))):
             if close[i]<openn[j]:
@@ -123,7 +129,7 @@ def csv_data(dataf):
         uval_br = ([len(list(group)) for key, group in groupby(years)])
         return (br, uval_br)
     
-    def error_mixed_issue(l):
+    def error_mixed_issue(l): # making sure analized data are not mixed
         if l==0:
             s1 = "NO ERROR!! Bull and Bear have unique values and their indeces are not mixed."
             return s1
@@ -131,7 +137,7 @@ def csv_data(dataf):
             s2 = "ERROR!! Bull and Bear index/indeces is/are mathced, smoething is not right!"
             return s2
         
-    def linear_regression(x_val1,x_val2,y_val):
+    def linear_regression(x_val1,x_val2,y_val): # calculate linear_regression
         sum_x = np.array([float(x) for x in y_val])
         sum_y = np.array([float(x + y)/2 for x, y in zip(x_val1,x_val2)])
         fit = np.polyfit(sum_x, sum_y, deg=1)
@@ -154,7 +160,7 @@ def csv_data(dataf):
     bull_cond4 = itrate_and_compare1(close,openn)
     green = green_bullishEn_candle(close,openn)
     
-    bull_index = set(bull_bear_high)&set(bull_bear_low)&set(bull_cond3)&set(bull_cond4)&set(green)
+    bull_index = set(bull_bear_high)&set(bull_bear_low)&set(bull_cond3)&set(bull_cond4)&set(green) # finding indeces for all bullish engulfing
     print('Total Number Bullish Engulfigns: ',len(bull_index))
     
     bull_bear_high = itrate_and_compare1(high,high)
@@ -163,7 +169,7 @@ def csv_data(dataf):
     bear_cond4 = itrate_and_compare2(close,openn)
     red = red_bearishEn_candle(close,openn)
     
-    bear_index = set(bull_bear_high)&set(bull_bear_low)&set(bear_cond3)&set(bear_cond4)&set(red)
+    bear_index = set(bull_bear_high)&set(bull_bear_low)&set(bear_cond3)&set(bear_cond4)&set(red) # finding indeces for all bearish engulfing
     print('Total Number Bearish Engulfigns: ',len(bear_index))
     
     #----------------------Error Detection-------------------------#
@@ -176,13 +182,11 @@ def csv_data(dataf):
     
     bullishDates = engulfing_dates(bull_index,date)
     print('Bullish Engulfing Occurrence Date(s):',bullishDates)
-#    formatted_bull_dates = format_dates(bullishDates) # will need for candle plot
-    
+
     #-----------------------Bearish Dates--------------------------#
     
     bearishDates = engulfing_dates(bear_index,date)
     print('Bearish Engulfing Occurrence Date(s):',bearishDates)
-#    formatted_bear_dates = format_dates(bearishDates) # will need for candle plot
     
     #-----------------------Bullish Years--------------------------#
     
@@ -271,7 +275,7 @@ def linear_regression(x_val1,x_val2,y_val):
     fit = np.polyfit(sum_x, sum_y, deg=1)
     return sum_x,sum_y,fit
 
-def plots(x,y,a,b, x2,y2,a2,b2): # Apple: x,y,a,b; Microsoft: x2,y2,a2,b2
+def plots(x,y,a,b, x2,y2,a2,b2): # Apple: x,y,a,b; Microsoft: x2,y2,a2,b2 for subplots
         
     plt.close('all')
     rcParams['figure.figsize'] = 13, 8
@@ -311,7 +315,7 @@ def plots(x,y,a,b, x2,y2,a2,b2): # Apple: x,y,a,b; Microsoft: x2,y2,a2,b2
     plt.show()
     
 
-def bar_plot(product_years, en_years, bull, bear, products):
+def bar_plot(product_years, en_years, bull, bear, products): # for bar plot
     
     def make_data_plotable(product_years, en_years, bull, bear, products): # keeping years of data that  
         product_years = list(map(int, product_years))                       # match with porduct release yeras
@@ -390,7 +394,7 @@ def save_result_as_csv(a_bu, a_uval_bu, a_uval_br, m_uval_bu, m_uval_br,years, p
 ########################******** END of PLOTTING *********##################################    
 
         
-#PASS CSV and PLot
+#PASS CSV and Call HTML and other methods to get the disaired output and images
 print("\n"*30)
 data1 = 'aapl_large.csv'
 data2 = 'msft_large.csv'
@@ -402,22 +406,21 @@ m_bu, m_uval_bu, m_br, m_uval_br, close,bull_index, bear_index = csv_data(data2)
 years, products = HTML_file()
 
 print("\n"*30)
-print("\n","-"*20," RESULTS ","-"*20,"\n")
+print("\n","-"*20," RESULTS ","-"*20,"\n") # Apple results
 print("Apple Inc. Results (CSV):\n", "Years: ", a_bu, "\nBullish Engulfing: ",
       a_uval_bu, "\nBeraish Engulfings: ", a_uval_br, "\nTotal Bullish Engulfings: ",
       sum(a_uval_bu), "\nTotal Bearish Engulfings: ", sum(a_uval_br))
 
-print("\n","-"*20,"*"*10,"-"*20,"\n")
-
+print("\n","-"*20,"*"*10,"-"*20,"\n") # Microsoft results
 print("Microsoft Corp. Results (CSV):\n", "Years: ",m_bu, "\nBullish Engulfings: ",
       m_uval_bu,"\nBeraish Engulfings: ", m_uval_br, "\nTotal Bullish Engulfings: ",
       sum(m_uval_bu), "\nTotal Bearish Engulfings: ", sum(m_uval_br))
 
-print("\n","-"*20,"*"*10,"-"*20,"\n")
-
+print("\n","-"*20,"*"*10,"-"*20,"\n") # HTML results
 print("Apple Inc. Product Results (HTML):\n", "Years: ", years, "\nReleases: ", products,
        "\n Total Amount of Product: ", sum(products))
 
+# plotting and saving data
 plots(a_bu, a_uval_bu, a_br, a_uval_br, m_bu, m_uval_bu, m_br, m_uval_br) 
 Scatter_plot(years, products)
 bar_plot(years, a_bu, a_uval_bu, a_uval_br, products)
