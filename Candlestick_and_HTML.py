@@ -1,24 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed May 10 14:09:50 2017
-
+Created on Wed Apr 30 14:09:50 2017
 @author: ziaulchoudhury
+
 """
-import csv
-import matplotlib.pyplot as plt
-import numpy as np 
-from itertools import groupby 
-import urllib.request
-from bs4 import BeautifulSoup
-from pylab import rcParams
+import csv # read and write csv datasets
+import matplotlib.pyplot as plt # plotting
+import numpy as np # number
+from itertools import groupby, zip_longest # goruping and list's longest index 
+import urllib.request # access wabsites
+from bs4 import BeautifulSoup # extract HTML dataset
+from pylab import rcParams # plot figure size incerase or decrease by programmer choice
 import time # execuation time clacualitons
-start_time = time.time()
+
+start_time = time.time() # start time
 
 #CSV data-sets
 def csv_data(dataf): # for analizing csv datasets
     
-    #-------------------Read Data/CSV File 1---------------------#
+    #-------------------Read Data/CSV Files---------------------#
     
     file = open(dataf)
     csv_reader = csv.reader(file)
@@ -48,11 +49,12 @@ def csv_data(dataf): # for analizing csv datasets
     file.close()
     
     print("CSV DATASETS: ")
+    
     #-------------------Aanalize CSV Data---------------------#
     """ 
-    Conditions:
+    Conditions in simple from:
         1. For Bullish engulfing:  
-           if ( (day2.high >= day1.high)  and  (day2.low <= day1.low) and (day2.open <= day1.close) and (day2.close >= day1.open) ) 
+           if ( (day2.high >= day1.high) and (day2.low <= day1.low) and (day2.open <= day1.close) and (day2.close >= day1.open) ) 
         2. For Bearish engulfing:
            if ( (day2.high >= day1.high) and (day2.low <= day1.low) and (day2.open >= day1.close) and (day2.close <= day1.open) )
     """
@@ -114,7 +116,7 @@ def csv_data(dataf): # for analizing csv datasets
             year.append(monthNum)                  
         return year
     
-    def engulfing_dates(index,date):
+    def engulfing_dates(index,date): # finding date index 
         Dates = []
         print('- '*40)
         my_list2 = list(index)
@@ -123,7 +125,7 @@ def csv_data(dataf): # for analizing csv datasets
         Dates.sort()
         return (Dates)
     
-    def unique_val(years):
+    def unique_val(years): # get rid of multiple same values
         years.sort()
         br = np.unique(years).tolist() 
         uval_br = ([len(list(group)) for key, group in groupby(years)])
@@ -152,7 +154,7 @@ def csv_data(dataf): # for analizing csv datasets
     print("Total Red Candle-sticks found: ",len((red_candle(close,openn))))
     print("Excluidng Others types (Doji and etc.).")
     
-    #------------------Passing data-sets to analize--------------------# 
+    #------------Passing data-sets to methods above to analize-------------# 
        
     bull_bear_high = itrate_and_compare1(high,high)
     bull_bear_low = itrate_and_compare2(low,low)
@@ -161,7 +163,7 @@ def csv_data(dataf): # for analizing csv datasets
     green = green_bullishEn_candle(close,openn)
     
     bull_index = set(bull_bear_high)&set(bull_bear_low)&set(bull_cond3)&set(bull_cond4)&set(green) # finding indeces for all bullish engulfing
-    print('Total Number Bullish Engulfigns: ',len(bull_index))
+
     
     bull_bear_high = itrate_and_compare1(high,high)
     bull_bear_low = itrate_and_compare2(low,low)
@@ -170,7 +172,6 @@ def csv_data(dataf): # for analizing csv datasets
     red = red_bearishEn_candle(close,openn)
     
     bear_index = set(bull_bear_high)&set(bull_bear_low)&set(bear_cond3)&set(bear_cond4)&set(red) # finding indeces for all bearish engulfing
-    print('Total Number Bearish Engulfigns: ',len(bear_index))
     
     #----------------------Error Detection-------------------------#
     
@@ -181,28 +182,22 @@ def csv_data(dataf): # for analizing csv datasets
     #-----------------------Bullish Dates--------------------------#
     
     bullishDates = engulfing_dates(bull_index,date)
-    print('Bullish Engulfing Occurrence Date(s):',bullishDates)
 
     #-----------------------Bearish Dates--------------------------#
     
     bearishDates = engulfing_dates(bear_index,date)
-    print('Bearish Engulfing Occurrence Date(s):',bearishDates)
     
     #-----------------------Bullish Years--------------------------#
     
     bullish_years = (get_year(bullishDates))
     bu, uval_bu = unique_val(bullish_years)  
-    print('Unique Years for Bullish\'s Engulfings: ', bu)
-    print('Unique Occrunces for Bullish\'s engulfings: ', uval_bu)
     
     #-----------------------Bearish Years--------------------------#
     
     bearish_years = (get_year(bearishDates))
     br, uval_br = unique_val(bearish_years)      
-    print('Unique Years for Bearish\'s Engulfings: ', br)
-    print('Unique Occrunces for Bearish engulfings: ', uval_br)
     
-    return bu, uval_bu, br, uval_br, close, bull_index, bear_index
+    return bu, uval_bu, br, uval_br, close, bull_index, bear_index, bullishDates, bearishDates
 
 ########################******** END CSV ("csv_data") *********##################################
 
@@ -257,7 +252,7 @@ def HTML_file():
 def Scatter_plot(x, y): 
     
     plt.close('all')
-    rcParams['figure.figsize'] = 14, 5  # fig size by prgrammer choice 
+    rcParams['figure.figsize'] = 12, 5  # fig size by prgrammer choice 
     
     plt.plot(x, y ,color='y')
     plt.scatter(x, y ,color='b', label="Product Release")
@@ -268,17 +263,17 @@ def Scatter_plot(x, y):
     plt.savefig("HTML_plot.png")
     plt.show()
 
-def linear_regression(x_val1,x_val2,y_val):
+def linear_regression(x_val1,x_val2,y_val): # linear regression with np.polyfit()
     
     sum_x = np.array([float(x) for x in y_val])
     sum_y = np.array([float(x + y)/2 for x, y in zip(x_val1,x_val2)])
     fit = np.polyfit(sum_x, sum_y, deg=1)
     return sum_x,sum_y,fit
 
-def plots(x,y,a,b, x2,y2,a2,b2): # Apple: x,y,a,b; Microsoft: x2,y2,a2,b2 for subplots
+def plots(x,y,a,b, x2,y2,a2,b2): # Apple: x,y,a,b; Microsoft: x2,y2,a2,b2 for subplots plotting
         
     plt.close('all')
-    rcParams['figure.figsize'] = 13, 8
+    rcParams['figure.figsize'] = 12, 8
     # Three subplots sharing both x/y axes
     f, (ax1, ax2, ax3) = plt.subplots(3)
     
@@ -302,14 +297,14 @@ def plots(x,y,a,b, x2,y2,a2,b2): # Apple: x,y,a,b; Microsoft: x2,y2,a2,b2 for su
     y3 = sum_y2 
     m2, b2 = np.polyfit(x3, y3, 1)
 
-    ax3.plot(x1, y1, '*',label="Apple Actual")
+    ax3.plot(x1, y1, '*',label="Apple Actual") # linear fit line for both
     ax3.plot(x1, m*x1 + b, '-',label="Apple Linear")
     ax3.plot(x3, y3, '*',label="Microsoft Actual")
     ax3.plot(x3, m2*x3 + b2, '-',label="Microsoft Linear")
     ax3.legend(loc = 1,fontsize = 'x-small')
     ax3.set_title('Linear Regression Between Bullish and Bearish on Both.', color='b')
 
-    f.subplots_adjust(hspace=.3)
+    f.subplots_adjust(hspace=.3) # space between plots
     plt.setp([a.get_xticklabels() for a in f.axes[1:-1]])
     plt.savefig('multiPlots.png')
     plt.show()
@@ -318,7 +313,7 @@ def plots(x,y,a,b, x2,y2,a2,b2): # Apple: x,y,a,b; Microsoft: x2,y2,a2,b2 for su
 def bar_plot(product_years, en_years, bull, bear, products): # for bar plot
     
     def make_data_plotable(product_years, en_years, bull, bear, products): # keeping years of data that  
-        product_years = list(map(int, product_years))                       # match with porduct release yeras
+        product_years = list(map(int, product_years))                  # match with porduct release yeras
         product_years_ = product_years[11:]
         
         en_years = list(map(int, en_years))
@@ -373,22 +368,22 @@ def bar_plot(product_years, en_years, bull, bear, products): # for bar plot
     plt.show()
 
 
-def save_result_as_csv(a_bu, a_uval_bu, a_uval_br, m_uval_bu, m_uval_br,years, products):
+def save_result_as_csv(a_bu, a_uval_bu, a_br, a_uval_br, m_bu, m_uval_bu, m_br, m_uval_br, 
+                   years, products,a_bullishDates, a_bearishDates, m_bullishDates, m_bearishDates ):
     
-    f = open("atest.csv", "w")
+    with open('output.csv', 'w') as outcsv:
+        writer = csv.writer(outcsv)
+        writer.writerow(["Year", "Total Apple Bullish En. Per-Year", "Year", "Total Apple Bearish En. Per-Year", "Year", # title of each row
+                         "Total Microsoft Bullish En. Per-Year", "Year", "Total Microsoft Bearish En. Per-Year",
+                         "Apple Porduct Year", "Apple Product Released Per-Year", "Bullish Engulfing Dates (Apple)",
+                         "Bearish Engulfing Dated (Apple)", "Bullish Engulfing Dates (Microsoft)", 
+                         "Bearish Engulfing Dates (Microsoft)"])
+        for row in zip_longest(a_bu, a_uval_bu, a_br, a_uval_br, m_bu, m_uval_bu, m_br, m_uval_br, 
+                   years, products,a_bullishDates, a_bearishDates, m_bullishDates, m_bearishDates): # writing to csv with longest list index
+            writer.writerow(row)
     
-    f.write("Engulfing Report based on CSV data-sets:,\n")
-    f.write("Year, Apple Bullish en., Microsoft Bullish En., \t, Apple Bearish en., Microsoft Bearish En.\n")
-    for i in range(len(a_bu)):
-        f.write("{}, {}, {}, \t, {}, {}\n".format(a_bu[i], a_uval_bu[i], m_uval_bu[i], a_uval_br[i], m_uval_br[i]))
-    
-    f.write("\n,\n Apple Porduct Release based on HTML data-set:,\n")
-    
-    f.write("Year, Total Releases\n")
-    for i in range(len(years)):
-        f.write("{}, {}\n".format(years[i], products[i]))
-        
-    f.close()    
+
+    outcsv.close()    
 
 
 ########################******** END of PLOTTING *********##################################    
@@ -401,8 +396,8 @@ data2 = 'msft_large.csv'
 data3 = 'test.csv'
 
 
-a_bu, a_uval_bu, a_br, a_uval_br, close,bull_index, bear_index = csv_data(data1)
-m_bu, m_uval_bu, m_br, m_uval_br, close,bull_index, bear_index = csv_data(data2)
+a_bu, a_uval_bu, a_br, a_uval_br, close,bull_index, bear_index, a_bullishDates, a_bearishDates = csv_data(data1)
+m_bu, m_uval_bu, m_br, m_uval_br, close,bull_index, bear_index, m_bullishDates, m_bearishDates = csv_data(data2)
 years, products = HTML_file()
 
 print("\n"*30)
@@ -420,11 +415,18 @@ print("\n","-"*20,"*"*10,"-"*20,"\n") # HTML results
 print("Apple Inc. Product Results (HTML):\n", "Years: ", years, "\nReleases: ", products,
        "\n Total Amount of Product: ", sum(products))
 
-# plotting and saving data
+print("\n","-"*20,"*"*10,"-"*20,"\n")
+print("Bullish Engulfing Dates (Apple): ", a_bullishDates, "\nBearish Engulfing Dates (Apple): " , a_bearishDates )
+print("Bullish Engulfing Dates (Microsoft): ", a_bullishDates, "\nBearish Engulfing Dates (Microsoft): " , a_bearishDates )
+
+# plotting and saving data as csv by calling each created methods above
 plots(a_bu, a_uval_bu, a_br, a_uval_br, m_bu, m_uval_bu, m_br, m_uval_br) 
 Scatter_plot(years, products)
 bar_plot(years, a_bu, a_uval_bu, a_uval_br, products)
-save_result_as_csv(a_bu, a_uval_bu, a_uval_br, m_uval_bu, m_uval_br,years, products)
+save_result_as_csv(a_bu, a_uval_bu, a_br, a_uval_br, m_bu, m_uval_bu, m_br, m_uval_br, 
+                   years, products,a_bullishDates, a_bearishDates, m_bullishDates, m_bearishDates )
 
 
-print("---Execuation Time: %.4s seconds ---" % (time.time() - start_time)) 
+print("---Execuation Time: %.4s seconds ---" % (time.time() - start_time)) # print execuation time
+
+#END#
